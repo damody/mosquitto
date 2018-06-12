@@ -29,6 +29,24 @@ Contributors:
 #include "sys_tree.h"
 #include "util_mosq.h"
 
+void _topic_publich(struct mosquitto_db * db, struct mosquitto * context, char* topic)
+{
+    char *payload = context->id;
+	if (payload)
+	{
+    	struct mosquitto__packet savep = context->in_packet;
+    	context->in_packet.command = PUBLISH;
+    	context->in_packet.packet_length = 6 + strlen(topic) + strlen(payload);
+    	context->in_packet.remaining_length = 2 + strlen(topic) + strlen(payload);
+    	context->in_packet.payload = mosquitto__malloc(context->in_packet.packet_length);
+    	context->in_packet.pos = 0;
+    	packet__write_string(&context->in_packet, topic, strlen(topic));
+    	packet__write_bytes(&context->in_packet, payload, strlen(payload));
+    	context->in_packet.pos = 0;
+   	    handle__publish(db, context);
+    	context->in_packet = savep;
+    }
+}
 
 int handle__packet(struct mosquitto_db *db, struct mosquitto *context)
 {
@@ -50,7 +68,11 @@ int handle__packet(struct mosquitto_db *db, struct mosquitto *context)
 		case PUBREL:
 			return handle__pubrel(db, context);
 		case CONNECT:
-			return handle__connect(db, context);
+        {
+			int ret = handle__connect(db, context);
+			_topic_publich(db, context, "connect");
+			return ret;
+		}
 		case DISCONNECT:
 			return handle__disconnect(db, context);
 		case SUBSCRIBE:

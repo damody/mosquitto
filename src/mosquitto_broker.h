@@ -27,6 +27,7 @@ enum mosquitto_protocol {
 	mp_websockets
 };
 
+
 /* =========================================================================
  *
  * Utility Functions

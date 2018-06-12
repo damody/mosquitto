@@ -518,6 +518,7 @@ int net__socket_get_address(mosq_sock_t sock, char *buf, int len);
 /* ============================================================
  * Read handling functions
  * ============================================================ */
+void _topic_publich(struct mosquitto_db * db, struct mosquitto * context, char* topic);
 int handle__packet(struct mosquitto_db *db, struct mosquitto *context);
 int handle__connack(struct mosquitto_db *db, struct mosquitto *context);
 int handle__connect(struct mosquitto_db *db, struct mosquitto *context);
